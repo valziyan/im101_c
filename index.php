@@ -17,7 +17,7 @@ try {
     if ($name) {
         $sql = "INSERT INTO user (name) VALUES ('$name')";
         $conn->exec($sql);
-        echo "new registration!";
+        echo "New Registration!";
     }
 
 
@@ -36,7 +36,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Register</title>
 </head>
 <body>
     <h1>User Registration!</h1>
