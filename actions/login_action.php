@@ -19,7 +19,7 @@ try {
 
     
     $sql = "SELECT username, password FROM user WHERE username='$username' AND password='$password'";
-    $conn->exec($sql); 
+    $conn->exec(statement: $sql); 
     echo "User Login!";
     
 

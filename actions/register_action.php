@@ -1,32 +1,58 @@
 <?php
 
+// Include the database connection file
+include 'database.php';
+
 // post data
 $name = $_POST['name'];
 $username = $_POST['username'];
 $password = $_POST['password'];
 $date_now = date('d-m-Y');
 
-// server credentials
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "im101_c";
+// Validate inputs
+if (empty($name) || empty($username) || empty($password)) {
+    die("All fields are required!");
+}
+
+// Hash the password
+$hashed_password = password_hash($password, PASSWORD_BCRYPT);
+$date_now = date('Y-m-d'); // Standard date format
 
 try {
+    // Insert user data into the database using a prepared statement
+    $sql = "INSERT INTO user (name, username, password, date_joined) VALUES (:name, :username, :password, :date_joined)";
+    $stmt = $conn->prepare($sql);
 
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $dbusername, $dbpassword);
+    // Bind parameters
+    $stmt->bindParam(':name', $name);
+    $stmt->bindParam(':username', $username);
+    $stmt->bindParam(':password', $hashed_password);
+    $stmt->bindParam(':date_joined', $date_now);
+
+    // Execute the statement
+    $stmt->execute();
     
-    // set the PDO error mode to exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Start User Session [user_id]
+    // and Get ID of The Last Inserted Record
+    session_start();
+    $user_id = $conn->lastInsertId();
 
-    if ($name) {
-        $sql = "INSERT INTO user (name, username, password, date_joined) VALUES ('$name', '$username', '$password', '$date_now')";
-        $conn->exec($sql);
-        echo "New Registration!";
-    }
+    // retrive user data
+    $sql2 = "SELECT id, name, username, date_joined FROM user WHERE id = $user_id";
+    $result = $conn->prepare($sql2);
+    $result->execute();
 
-} catch(PDOException $e) {
+    // set fetch mode
+    $result->setFetchMode(PDO::FETCH_ASSOC);
 
-    echo "Connection failed: " . $e->getMessage();
+    // Store result into session variable user
+    $_SESSION['user'] = $result->fetch();
 
-}
+    // Redirect the newly registered
+    header('Location: ../profile.php');
+
+} catch (PDOException $e) {
+
+    echo "Error: " . $e->getMessage();
+
+}   
